@@ -1,0 +1,759 @@
+{
+  "name": "AI Support Assistant — TechStore",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        384
+      ],
+      "id": "42d55839-9be9-483e-80cc-9be3022e516f",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "OFQo2ffaOtrQb6Xn",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"department\": \"support\",\n  \"priority\": \"medium\",\n  \"topic\": \"order_status\",\n  \"order_number\": \"23232\",\n  \"summary\": \"Клиент запрашивает статус доставки заказа.\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        448,
+        320
+      ],
+      "id": "34199dbf-c475-4b53-9ee8-80084b01c690",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -432,
+        144
+      ],
+      "id": "6530d9bd-1a29-4fcf-8de0-6c3c1af43495",
+      "name": "Receive Request",
+      "webhookId": "b2be2891-ab51-4634-a5e6-52df8c0182dc",
+      "credentials": {
+        "telegramApi": {
+          "id": "oW4xu05XxbTcrFqx",
+          "name": "Telegram mngr"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ab0a1d28-84e5-4649-9548-71bd5405b786",
+              "name": "source",
+              "value": "Telegram",
+              "type": "string"
+            },
+            {
+              "id": "75d5d06f-28bb-4d0f-84b9-b18eff2573e8",
+              "name": "customer_name",
+              "value": "={{ $json.message.from.first_name }}",
+              "type": "string"
+            },
+            {
+              "id": "791e746e-c50f-470b-9389-0cc58acf3c2a",
+              "name": "customer_contact",
+              "value": "={{ $json.message.from.username }}",
+              "type": "string"
+            },
+            {
+              "id": "f62d1ca5-ee55-4b1e-b44b-5ac28c1efb5c",
+              "name": "message",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "e0a39e09-7cf5-41a7-95f9-189d5468b957",
+              "name": "received_at",
+              "value": "={{ $json.message.date }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -48,
+        144
+      ],
+      "id": "268c9d7d-2c53-4e0b-908d-c76816cf6781",
+      "name": "🧹 Normalize Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Customer request:\n\n{{ $json.message }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Ты AI-ассистент службы поддержки интернет-магазина электроники TechStore.\n\nТвоя задача — проанализировать обращение клиента, классифицировать его, извлечь важные данные и подготовить структурированный результат для дальнейшей автоматической обработки.\n\n--------------------------------------------------\nПРАВИЛА ОПРЕДЕЛЕНИЯ ОТДЕЛА (Department)\n--------------------------------------------------\n\nsales\n\nИспользуй категорию \"sales\", если клиент еще НЕ совершил покупку и обращается с вопросами:\n\n• выбор товара;\n• наличие товара;\n• характеристики;\n• стоимость;\n• скидки;\n• доставка до оформления заказа;\n• гарантия до покупки;\n• оформление нового заказа.\n\nsupport\n\nИспользуй категорию \"support\", если клиент уже совершил покупку и обращается по вопросам:\n\n• статус существующего заказа;\n• доставка существующего заказа;\n• неисправность товара;\n• поврежденный товар;\n• гарантийный случай;\n• проблемы с аккаунтом;\n• технические ошибки сайта;\n• проблемы с оформленным заказом.\n\nfinance\n\nИспользуй категорию \"finance\", если обращение связано с финансами:\n\n• проблемы с оплатой;\n• возврат денежных средств;\n• двойное списание;\n• счета;\n• чеки;\n• ошибки оплаты;\n• возврат товара с возмещением денег.\n\nother\n\nИспользуй категорию \"other\", если обращение не относится ни к одной категории выше.\n\n--------------------------------------------------\nПРАВИЛА ОПРЕДЕЛЕНИЯ ПРИОРИТЕТА (Priority)\n--------------------------------------------------\n\nhigh\n\nИспользуй высокий приоритет если:\n\n• клиент не получил оплаченный заказ;\n• товар пришел поврежденным;\n• произошло двойное списание;\n• возникли проблемы с возвратом денежных средств;\n• деньги списались, но заказ не был создан.\n\nmedium\n\nИспользуй средний приоритет если:\n\n• проблемы со входом в аккаунт;\n• задержка доставки;\n• проблемы с обработкой заказа;\n• технические ошибки сайта;\n• другие проблемы, не приводящие к финансовым потерям.\n\nlow\n\nИспользуй низкий приоритет если:\n\n• вопросы до покупки;\n• информация о товаре;\n• наличие;\n• характеристики;\n• цены;\n• скидки;\n• общие консультации.\n\n--------------------------------------------------\nПРАВИЛА ОПРЕДЕЛЕНИЯ ТЕМЫ (Topic)\n--------------------------------------------------\n\nИспользуй только одну тему.\n\norder_status\n\nКлиент спрашивает:\n\n• где заказ;\n• когда приедет заказ;\n• на каком этапе находится заказ.\n\ndelivery\n\nОбщие вопросы о доставке ДО оформления заказа.\n\npayment\n\nПроблемы с оплатой.\n\nrefund\n\nВозврат денежных средств.\n\naccount\n\nПроблемы со входом или аккаунтом.\n\nwarranty\n\nГарантийное обслуживание.\n\nproduct\n\nВопросы о товаре.\n\npricing\n\nЦена, скидки, стоимость.\n\ntechnical_issue\n\nТехнические ошибки сайта или сервиса.\n\nother\n\nВсе остальные случаи.\n\n--------------------------------------------------\nДОПОЛНИТЕЛЬНЫЕ ПРАВИЛА\n--------------------------------------------------\n\n• Анализируй смысл обращения, а не отдельные слова.\n\n• Если клиент уже оформил заказ, вопросы о его доставке относятся к теме order_status, а НЕ delivery.\n\n• Если номер заказа присутствует — извлеки его.\n\n• Если номера заказа нет — верни пустую строку.\n\n• Создай краткое описание обращения в одном предложении.\n\n• Не отвечай клиенту.\n\n• Подготовь данные только для автоматической обработки.\n\n--------------------------------------------------\nРАЗРЕШЕННЫЕ ЗНАЧЕНИЯ\n--------------------------------------------------\n\ndepartment:\n\nsales\nsupport\nfinance\nother\n\npriority:\n\nlow\nmedium\nhigh\n\ntopic:\n\norder_status\ndelivery\npayment\nrefund\naccount\nwarranty\nproduct\npricing\ntechnical_issue\nother"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        304,
+        144
+      ],
+      "id": "0bfde4ed-3b90-4cc3-9542-cdb3e4cd092c",
+      "name": "🤖 AI Classifier"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5a6bc1cd-f209-4d95-be61-513b219aaa44",
+              "name": "department_name",
+              "value": "={{\n{\n  sales: \"Продажи\",\n  support: \"Поддержка\",\n  finance: \"Финансы\",\n  other: \"Другое\"\n}[$json.output.department] || $json.output.department\n}}",
+              "type": "string"
+            },
+            {
+              "id": "a23a274f-2f2d-4515-91ba-c550746ae736",
+              "name": "priority_name",
+              "value": "={{\n{\n  low: \"Низкий\",\n  medium: \"Средний\",\n  high: \"Высокий\"\n}[$json.output.priority] || $json.output.priority\n}}",
+              "type": "string"
+            },
+            {
+              "id": "041695bc-ea6f-4769-9bda-a0e8ad798065",
+              "name": "topic_name",
+              "value": "={{\n{\n  order_status: \"Статус заказа\",\n  delivery: \"Доставка\",\n  payment: \"Оплата\",\n  refund: \"Возврат средств\",\n  account: \"Аккаунт\",\n  warranty: \"Гарантия\",\n  product: \"Товар\",\n  pricing: \"Цена / Скидки\",\n  technical_issue: \"Техническая проблема\",\n  other: \"Другое\"\n}[$json.output.topic] || $json.output.topic\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        144
+      ],
+      "id": "92d7ff31-c76e-4913-972f-9787f0416b98",
+      "name": "🧩 Prepare Response"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1WsgshufnvdOTqq3aieyYrNg2_uTQTIyJAlsKKisQwaI",
+          "mode": "list",
+          "cachedResultName": "lids AI Support Assistant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WsgshufnvdOTqq3aieyYrNg2_uTQTIyJAlsKKisQwaI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Лист1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WsgshufnvdOTqq3aieyYrNg2_uTQTIyJAlsKKisQwaI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "received_at": "={{\nDateTime\n  .fromSeconds($('🧹 Normalize Request').item.json.received_at)\n  .setZone('Europe/Moscow')\n  .toFormat('dd.MM.yyyy HH:mm')\n}}",
+            "source": "={{ $('🧹 Normalize Request').item.json.source }}",
+            "customer_name": "={{ $('🧹 Normalize Request').item.json.customer_name }}",
+            "customer_contact": "={{ $('🧹 Normalize Request').item.json.customer_contact }}",
+            "department": "={{ $json.department_name }}",
+            "priority": "={{ $json.priority_name }}",
+            "topic": "={{ $json.topic_name }}",
+            "message": "={{ $('🧹 Normalize Request').item.json.message }}",
+            "order_number": "={{ $json.output.order_number || '' }}",
+            "description": "={{ $json.output.description }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_contact",
+              "displayName": "customer_contact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "department",
+              "displayName": "department",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "priority",
+              "displayName": "priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "topic",
+              "displayName": "topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "order_number",
+              "displayName": "order_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1200,
+        -240
+      ],
+      "id": "0aa086cc-b6d0-481b-8b9c-7624db7aa278",
+      "name": "💾 Save to Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nutiHwbfHdSjnaeM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.department }}",
+                    "rightValue": "support",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "204e1c48-1e1f-4511-ad3c-e8519fade1e0"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Support"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "5542b1ad-7e1b-4ad5-a003-df63ea609ac7",
+                    "leftValue": "={{ $json.output.department }}",
+                    "rightValue": "sales",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Sales"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2ff7ada6-ffe4-4509-9d9d-571bdc644acc",
+                    "leftValue": "={{ $json.output.department }}",
+                    "rightValue": "finance",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Finance"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2a1de9fc-2cb6-45ab-9d70-3709803ffa82",
+                    "leftValue": "={{ $json.output.department }}",
+                    "rightValue": "other",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Other"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1200,
+        112
+      ],
+      "id": "ae774e40-6e7f-4df6-bbf8-f04f0dcb6d20",
+      "name": "🔀 Route by Department"
+    },
+    {
+      "parameters": {
+        "chatId": "472650610",
+        "text": "=📩 Новое обращение\n\n👤 Клиент: {{ $('🧹 Normalize Request').item.json.customer_name }}\n\n📂 Отдел: {{ $json.department_name }}\n\n🔥 Приоритет: {{ $json.priority_name }}\n\n🏷 Тема: {{ $json.topic_name }}\n\n📦 Заказ: {{ $json.output.order_number || '—' }}\n\n💬 Сообщение:\n{{ $('🧹 Normalize Request').item.json.message }}\n\n📝 Кратко:\n{{ $json.output.description }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1680,
+        -176
+      ],
+      "id": "1e3dce44-0d23-45b2-88c1-01be44d19bb0",
+      "name": "📨 Notify Support",
+      "webhookId": "a057d86d-9d12-4d2e-98c8-7a2db6fc15d9",
+      "credentials": {
+        "telegramApi": {
+          "id": "oW4xu05XxbTcrFqx",
+          "name": "Telegram mngr"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "472650610",
+        "text": "=🛒 Новое обращение в отдел продаж\n\n👤 Клиент: {{ $('🧹 Normalize Request').item.json.customer_name }}\n\n📂 Отдел: {{ $json.department_name }}\n\n🔥 Приоритет: {{ $json.priority_name }}\n\n🏷 Тема: {{ $json.topic_name }}\n\n📦 Заказ: {{ $json.output.order_number || '—' }}\n\n💬 Сообщение:\n{{ $('🧹 Normalize Request').item.json.message }}\n\n📝 Кратко:\n{{ $json.output.description }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1680,
+        32
+      ],
+      "id": "b9255f32-d09a-4054-acbd-a0211b789da2",
+      "name": "📨 Notify Sales",
+      "webhookId": "a057d86d-9d12-4d2e-98c8-7a2db6fc15d9",
+      "credentials": {
+        "telegramApi": {
+          "id": "oW4xu05XxbTcrFqx",
+          "name": "Telegram mngr"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "472650610",
+        "text": "=💰 Новое финансовое обращение\n\n👤 Клиент: {{ $('🧹 Normalize Request').item.json.customer_name }}\n\n📂 Отдел: {{ $json.department_name }}\n\n🔥 Приоритет: {{ $json.priority_name }}\n\n🏷 Тема: {{ $json.topic_name }}\n\n📦 Заказ: {{ $json.output.order_number || '—' }}\n\n💬 Сообщение:\n{{ $('🧹 Normalize Request').item.json.message }}\n\n📝 Кратко:\n{{ $json.output.description }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1680,
+        240
+      ],
+      "id": "7831491e-d1f1-4252-b651-ed2008d00c14",
+      "name": "📨 Notify Finance",
+      "webhookId": "a057d86d-9d12-4d2e-98c8-7a2db6fc15d9",
+      "credentials": {
+        "telegramApi": {
+          "id": "oW4xu05XxbTcrFqx",
+          "name": "Telegram mngr"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "472650610",
+        "text": "=⚠️ Требуется ручная обработка\n\n👤 Клиент: {{ $('🧹 Normalize Request').item.json.customer_name }}\n\n📂 Отдел: {{ $json.department_name }}\n\n🔥 Приоритет: {{ $json.priority_name }}\n\n🏷 Тема: {{ $json.topic_name }}\n\n💬 Сообщение:\n{{ $('🧹 Normalize Request').item.json.message }}\n\n📝 Кратко:\n{{ $json.output.description }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1680,
+        448
+      ],
+      "id": "00a92efd-aa70-4bee-81ae-574e02857be1",
+      "name": "📨 Manual Review",
+      "webhookId": "a057d86d-9d12-4d2e-98c8-7a2db6fc15d9",
+      "credentials": {
+        "telegramApi": {
+          "id": "oW4xu05XxbTcrFqx",
+          "name": "Telegram mngr"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Receive client messages from Telegram",
+        "height": 336,
+        "color": "#0C3B5F"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        16
+      ],
+      "id": "91419dae-ef7d-46c5-8140-a9cf1c3d7d5f",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Normalize incoming request\nPrepare data for AI analysis",
+        "height": 336,
+        "width": 256,
+        "color": "#1C620E"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        16
+      ],
+      "id": "f8e9d238-3b2c-4698-9066-0b40e95b7769",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Classify request\nExtract structured information",
+        "height": 512,
+        "width": 320,
+        "color": "#323677"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        256,
+        16
+      ],
+      "id": "dfdc01cf-b45d-456c-9a7e-0bb6b0ffa85f",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Localize values\nPrepare data for notifications",
+        "height": 336,
+        "width": 256,
+        "color": "#666300"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        720,
+        16
+      ],
+      "id": "4cc0d05d-e878-45f0-957f-f886c121da1e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "Save every request to Google Sheets",
+        "height": 288,
+        "width": 256,
+        "color": "#552002"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        -336
+      ],
+      "id": "983a2784-ffc1-4a13-a3ed-6789c5ab5ff7",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "Route requests to the responsible department",
+        "height": 336,
+        "width": 262,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        16
+      ],
+      "id": "7efc505f-dfdb-4717-9763-6792c959a342",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "Notify responsible teams",
+        "height": 1040,
+        "width": 384
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        -336
+      ],
+      "id": "9fd2478d-906d-4863-b5e2-aa2d92c95ff9",
+      "name": "Sticky Note6"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "🤖 AI Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "🤖 AI Classifier",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive Request": {
+      "main": [
+        [
+          {
+            "node": "🧹 Normalize Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧹 Normalize Request": {
+      "main": [
+        [
+          {
+            "node": "🤖 AI Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🤖 AI Classifier": {
+      "main": [
+        [
+          {
+            "node": "🧩 Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧩 Prepare Response": {
+      "main": [
+        [
+          {
+            "node": "🔀 Route by Department",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "💾 Save to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "💾 Save to Google Sheets": {
+      "main": [
+        []
+      ]
+    },
+    "🔀 Route by Department": {
+      "main": [
+        [
+          {
+            "node": "📨 Notify Support",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📨 Notify Sales",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📨 Notify Finance",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📨 Manual Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "0d287f57-2ac8-4480-8409-ec9be32e56af",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2956e4cd5347a867f1090a368495256e2e072388f421e81930b3cb871ec25ba6"
+  },
+  "id": "v9GTe8WkpYZUNHQe",
+  "tags": []
+}
