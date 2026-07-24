@@ -62,9 +62,23 @@ Hi! Where is my order #23232? It was supposed to arrive yesterday.
 ## Tech Stack
 
 - n8n
-- OpenAI
+- OpenAI API
+- AI Agent
+- Structured Output Parser
 - Telegram Bot API
-- Google Sheets
+- Google Sheets API
+- JSON
+
+## Key Skills Demonstrated
+
+- AI-powered text classification
+- Structured JSON extraction
+- Workflow architecture in n8n
+- Business process automation
+- Department routing logic
+- Telegram Bot integration
+- Google Sheets integration
+- Prompt engineering
 
 ## Workflow
 
@@ -91,10 +105,22 @@ Department Router
 
 ## Repository Structure
 
-```
-workflow/
-└── AI Support Assistant — TechStore.json
-```
+.
+├── README.md
+├── workflow.png
+├── LICENSE
+└── workflow
+    └── AI Support Assistant — TechStore.json
+
+## Future Improvements
+
+- Email support integration
+- CRM integration (HubSpot / Pipedrive)
+- Automatic AI-generated replies
+- SLA monitoring
+- Analytics dashboard
+- Multi-language support
+- Customer sentiment analysis
 
 ## Author
 
