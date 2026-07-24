@@ -17,20 +17,25 @@ This workflow automatically analyzes incoming customer requests, classifies them
 
 ```text
 Telegram
-   ↓
+    │
+    ▼
 Normalize Request
-   ↓
+    │
+    ▼
 AI Classification
-   ↓
+    │
+    ▼
 Prepare Response
-   ↓
+    │
+    ▼
 Save to Google Sheets
-   ↓
+    │
+    ▼
 Department Router
-      ├─ Support
-      ├─ Sales
-      ├─ Finance
-      └─ Manual Review
+    ├── Support
+    ├── Sales
+    ├── Finance
+    └── Manual Review
 ```
 
 ## Demo
