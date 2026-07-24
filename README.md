@@ -13,6 +13,40 @@ This slows down response time, increases the risk of routing errors, and makes i
 
 This workflow automatically analyzes incoming customer requests, classifies them using AI, stores every request in Google Sheets, and routes notifications to the appropriate department.
 
+## Architecture
+
+1. Receive customer request from Telegram
+2. Normalize incoming data
+3. AI analyzes and classifies the request
+4. Convert values for business readability
+5. Save every request to Google Sheets
+6. Route the request to the correct department
+7. Notify the responsible team in Telegram
+
+## Demo
+
+### Example Input
+
+Customer:
+
+Hi! Where is my order #23232? It was supposed to arrive yesterday.
+
+
+### AI Classification
+
+| Field | Value |
+|------|------|
+| Department | Support |
+| Priority | Medium |
+| Topic | order_status |
+| Order Number | 23232 |
+
+### Automated Actions
+
+- Save request to Google Sheets
+- Send notification to Support team via Telegram
+- Store structured request data
+
 ## Features
 
 - Receive customer requests from Telegram
