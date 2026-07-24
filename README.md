@@ -90,25 +90,22 @@ Hi! Where is my order #23232? It was supposed to arrive yesterday.
 
 ## Workflow
 
-```
+```text
 Telegram
-      │
-      ▼
+   ↓
 Normalize Request
-      │
-      ▼
+   ↓
 AI Classification
-      │
-      ▼
+   ↓
 Prepare Response
-      ├──────────────► Google Sheets
-      │
-      ▼
+   ↓
+Save to Google Sheets
+   ↓
 Department Router
-      ├── Support
-      ├── Sales
-      ├── Finance
-      └── Manual Review
+      ├─ Support
+      ├─ Sales
+      ├─ Finance
+      └─ Manual Review
 ```
 
 ## Repository Structure
