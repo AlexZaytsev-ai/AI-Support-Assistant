@@ -47,7 +47,7 @@ Customer:
 Hi! Where is my order #23232? It was supposed to arrive yesterday.
 
 
-### AI Classification
+### AI Output
 
 | Field | Value |
 |------|------|
@@ -56,7 +56,7 @@ Hi! Where is my order #23232? It was supposed to arrive yesterday.
 | Topic | order_status |
 | Order Number | 23232 |
 
-### Automated Actions
+### Automation Result
 
 - Save request to Google Sheets
 - Send notification to Support team via Telegram
