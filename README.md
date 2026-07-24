@@ -15,13 +15,21 @@ This workflow automatically analyzes incoming customer requests, classifies them
 
 ## Architecture
 
-1. Receive customer request from Telegram
-2. Normalize incoming data
-3. AI analyzes and classifies the request
-4. Convert values for business readability
-5. Save every request to Google Sheets
-6. Route the request to the correct department
-7. Notify the responsible team in Telegram
+Telegram
+   ↓
+Normalize Request
+   ↓
+AI Classification
+   ↓
+Prepare Response
+   ↓
+Google Sheets
+   ↓
+Department Router
+   ├── Support
+   ├── Sales
+   ├── Finance
+   └── Manual Review
 
 ## Demo
 
