@@ -13,8 +13,9 @@ This slows down response time, increases the risk of routing errors, and makes i
 
 This workflow automatically analyzes incoming customer requests, classifies them using AI, stores every request in Google Sheets, and routes notifications to the appropriate department.
 
-## Architecture
+## Architecture workflow
 
+```text
 Telegram
    ↓
 Normalize Request
@@ -23,13 +24,14 @@ AI Classification
    ↓
 Prepare Response
    ↓
-Google Sheets
+Save to Google Sheets
    ↓
 Department Router
-   ├── Support
-   ├── Sales
-   ├── Finance
-   └── Manual Review
+      ├─ Support
+      ├─ Sales
+      ├─ Finance
+      └─ Manual Review
+```
 
 ## Demo
 
@@ -88,25 +90,6 @@ Hi! Where is my order #23232? It was supposed to arrive yesterday.
 - Google Sheets integration
 - Prompt engineering
 
-## Workflow
-
-```text
-Telegram
-   ↓
-Normalize Request
-   ↓
-AI Classification
-   ↓
-Prepare Response
-   ↓
-Save to Google Sheets
-   ↓
-Department Router
-      ├─ Support
-      ├─ Sales
-      ├─ Finance
-      └─ Manual Review
-```
 
 ## Repository Structure
 
