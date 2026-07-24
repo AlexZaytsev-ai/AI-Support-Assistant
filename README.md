@@ -7,7 +7,6 @@ AI-powered customer support automation workflow built with n8n.
 ## Business Problem
 
 Customer support teams often spend significant time manually reading, categorizing, and forwarding incoming requests.
-
 This slows down response time, increases the risk of routing errors, and makes it harder to track customer issues consistently.
 
 ## Overview
