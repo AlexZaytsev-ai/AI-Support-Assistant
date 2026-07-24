@@ -93,12 +93,14 @@ Hi! Where is my order #23232? It was supposed to arrive yesterday.
 
 ## Repository Structure
 
+```text
 .
 ├── README.md
 ├── workflow.png
 ├── LICENSE
 └── workflow
     └── AI Support Assistant — TechStore.json
+```
 
 ## Future Improvements
 
