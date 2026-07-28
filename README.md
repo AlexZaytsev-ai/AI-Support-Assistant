@@ -119,4 +119,9 @@ Hi! Where is my order #23232? It was supposed to arrive yesterday.
 
 ## Author
 
-Alexander Zaytsev
+**Alexander Zaytsev**
+
+AI Automation Engineer
+
+- GitHub: https://github.com/AlexZaytsev-ai
+- Email: polonix315@gmail.com
