@@ -23,9 +23,7 @@ Telegram Trigger
       ↓
 Normalize Request
       ↓
-AI Classifier
-      ↓
-Strict JSON Schema
+AI Classifier + Strict JSON Schema
       ↓
 Prepare Response
       ├── Save to Google Sheets
