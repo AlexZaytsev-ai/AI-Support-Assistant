@@ -1,6 +1,6 @@
 # AI Support Assistant
 
-![Workflow](workflow.png)
+![Workflow](workflowSupport.png)
 
 AI-powered customer support automation workflow built with n8n.
 
