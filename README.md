@@ -41,7 +41,7 @@ Prepare Response
 
 ## Workflow
 
-![AI Support Assistant workflow](workflow.png)
+![AI Support Assistant workflow](workflowSupport.png)
 
 ---
 
